@@ -34,7 +34,7 @@ def logout_view(request):
 
 @login_required
 def task_list(request):
-    tasks = Task.objects.all()
+    tasks = Task.objects.filter(user=request.user)
     pending_count = tasks.filter(completed=False).count()
     context = {
         'tasks': tasks,
@@ -52,7 +52,9 @@ def task_create(request):
     if request.method == 'POST':
         form = TaskForm(request.POST)
         if form.is_valid():
-            form.save()
+            task = form.save(commit=False)
+            task.user = request.user
+            task.save()
             return redirect('task_list')
     else:
         form = TaskForm()
